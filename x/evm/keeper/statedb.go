@@ -118,7 +118,10 @@ func (k *Keeper) SetAccount(ctx sdk.Context, addr common.Address, account stated
 
 	codeHash := common.BytesToHash(account.CodeHash)
 	ethAcct, ok := acct.(ethermint.EthAccountI)
+	logger := ctx.Logger().With("module", "x/evm")
+	logger.Info("EVM Set Account")
 	if !ok {
+		logger.Info("EVM Set Account change base to eth")
 		acct = &ethermint.EthAccount{
 			BaseAccount: authtypes.NewBaseAccount(acct.GetAddress(), acct.GetPubKey(), acct.GetAccountNumber(), acct.GetSequence()),
 			CodeHash:    common.BytesToHash(evmtypes.EmptyCodeHash).Hex(),
@@ -128,6 +131,7 @@ func (k *Keeper) SetAccount(ctx sdk.Context, addr common.Address, account stated
 		}
 	}
 	if ok {
+		logger.Info("EVM Set Account no change to account")
 		if err := ethAcct.SetCodeHash(codeHash); err != nil {
 			return err
 		}
