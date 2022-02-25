@@ -126,9 +126,7 @@ func (k *Keeper) SetAccount(ctx sdk.Context, addr common.Address, account stated
 			BaseAccount: authtypes.NewBaseAccount(acct.GetAddress(), acct.GetPubKey(), acct.GetAccountNumber(), acct.GetSequence()),
 			CodeHash:    common.BytesToHash(evmtypes.EmptyCodeHash).Hex(),
 		}
-		if err := acct.SetCodeHash(codeHash); err != nil {
-			return err
-		}
+		ethAcct, ok = acct.(ethermint.EthAccountI)
 	}
 	if ok {
 		logger.Info("EVM Set Account no change to account")
