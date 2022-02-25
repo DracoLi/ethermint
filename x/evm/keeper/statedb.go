@@ -8,10 +8,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/ethereum/go-ethereum/common"
 	ethermint "github.com/tharsis/ethermint/types"
 	"github.com/tharsis/ethermint/x/evm/statedb"
 	"github.com/tharsis/ethermint/x/evm/types"
+	evmtypes "github.com/tharsis/ethermint/x/evm/types"
 )
 
 var _ statedb.Keeper = &Keeper{}
@@ -115,8 +117,17 @@ func (k *Keeper) SetAccount(ctx sdk.Context, addr common.Address, account stated
 	}
 
 	codeHash := common.BytesToHash(account.CodeHash)
-
-	if ethAcct, ok := acct.(ethermint.EthAccountI); ok {
+	ethAcct, ok := acct.(ethermint.EthAccountI)
+	if codeHash != common.BytesToHash(types.EmptyCodeHash) && !ok {
+		acct = &ethermint.EthAccount{
+			BaseAccount: authtypes.NewBaseAccount(acct.GetAddress(), acct.GetPubKey(), acct.GetAccountNumber(), acct.GetSequence()),
+			CodeHash:    common.BytesToHash(evmtypes.EmptyCodeHash).Hex(),
+		}
+		if err := ethAcct.SetCodeHash(codeHash); err != nil {
+			return err
+		}
+	}
+	if ok {
 		if err := ethAcct.SetCodeHash(codeHash); err != nil {
 			return err
 		}
