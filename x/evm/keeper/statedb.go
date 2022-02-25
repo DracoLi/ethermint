@@ -118,7 +118,7 @@ func (k *Keeper) SetAccount(ctx sdk.Context, addr common.Address, account stated
 
 	codeHash := common.BytesToHash(account.CodeHash)
 	ethAcct, ok := acct.(ethermint.EthAccountI)
-	if codeHash != common.BytesToHash(types.EmptyCodeHash) && !ok {
+	if !ok {
 		acct = &ethermint.EthAccount{
 			BaseAccount: authtypes.NewBaseAccount(acct.GetAddress(), acct.GetPubKey(), acct.GetAccountNumber(), acct.GetSequence()),
 			CodeHash:    common.BytesToHash(evmtypes.EmptyCodeHash).Hex(),
